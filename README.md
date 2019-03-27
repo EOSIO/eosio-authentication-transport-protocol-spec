@@ -1,8 +1,16 @@
 # EOSIO Authentication Transport Protocol Specification
 
- **Specification Version**: 0.0.1
+**Specification Version**: 0.0.1
+
+## Challenge
+
+Mobile EOSIO wallets and app explorers restrict integrating app developers to a mobile web application form factor, and force users to access integrating apps within a blockchain-only browser. Most users expect native applications, or to access access mobile web applications from their general purpose browser. 
+
+## Overview
+
+This specification provides a framework that wallet developers can use to respond to requests from external applications, with a consistent handling logic in a request-response lifecycle. It aims to eliminate the need for niche blockchain-only browsers. 
  
- ![EOSIO Labs](https://img.shields.io/badge/EOSIO-Labs-5cb3ff.svg)
+![EOSIO Labs](https://img.shields.io/badge/EOSIO-Labs-5cb3ff.svg)
 
 ## About EOSIO Labs
 
