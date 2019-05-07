@@ -60,7 +60,7 @@ Change requests cover how the EOSIO Authentication Transport Protocol Specificat
 
 ## Working on EOSIO Authentication Transport Protocol Specification
 
-Code contributions are welcome and encouraged! If you are looking for a good place to start, check out the [good first issue](https://github.com/EOSIO/eosio-authentication-transport-protocol-spec/labels/good%20first%20issue) label in GitHub issues.
+Contributions are welcome and encouraged! If you are looking for a good place to start, check out the [good first issue](https://github.com/EOSIO/eosio-authentication-transport-protocol-spec/labels/good%20first%20issue) label in GitHub issues.
 
 Also, please follow these guidelines when submitting code:
 
@@ -98,8 +98,6 @@ Examples of unacceptable behavior include:
 - Public or private harassment
 - Publishing others’ private information, such as a physical or electronic address, without explicit permission
 - Other conduct which could reasonably be considered inappropriate in a professional setting
-
-
 
 ## Contributor License & Acknowledgments
 
