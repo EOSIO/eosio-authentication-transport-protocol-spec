@@ -1,16 +1,24 @@
 # EOSIO Authentication Transport Protocol Specification
+[![EOSIO Labs](https://img.shields.io/badge/EOSIO-Labs-5cb3ff.svg)](#about-eosio-labs)
 
 **Specification Version**: 0.0.1
 
 ## Challenge
 
-Mobile EOSIO wallets and app explorers restrict integrating app developers to a mobile web application form factor, and force users to access integrating apps within a blockchain-only browser. Most users expect native applications, or to access access mobile web applications from their general purpose browser. 
+Mobile EOSIO wallets and app explorers restrict integrating app developers to a mobile web application form factor, and force users to access integrating apps within a blockchain-only browser. Most users expect native applications, or to access mobile web applications from their general purpose browser. 
 
 ## Overview
 
-This specification provides a framework that wallet developers can use to respond to requests from external applications, with a consistent handling logic in a request-response lifecycle. It aims to eliminate the need for niche blockchain-only browsers. 
- 
-![EOSIO Labs](https://img.shields.io/badge/EOSIO-Labs-5cb3ff.svg)
+This specification provides a framework that wallet developers can use to respond to requests from external applications, with consistent handling logic in a request-response lifecycle. It aims to eliminate the need for niche, blockchain-only browsers and to more generally improve the user's overall experience and security.
+
+## Related Reading
+
+This is just one of several thought leadership pieces focusing on wallets, key management and authentication, and the relating user experience. For more context and related reading, check out these these pieces:
+
+* [A Passwordless Future: Building Towards More Secure and Usable Authentication Systems](https://medium.com/eosio/a-passwordless-future-building-towards-more-secure-and-usable-authentication-systems-e188f07e4b87)
+* [EOSIO Labs™ Release: The Universal Authenticator Library (UAL) — Increasing the Accessibility of Blockchain Applications](https://medium.com/eosio/eosio-labs-release-the-universal-authenticator-library-ual-increasing-the-accessibility-of-8e2bd62a78a5)
+* [EOSIO Software Release: Ricardian Contract Specifications and the Ricardian Template Toolkit](https://medium.com/eosio/eosio-software-release-ricardian-contract-specifications-and-the-ricardian-template-toolkit-a0db787429d1)
+* [EOSIO Manifest Specification](https://github.com/EOSIO/manifest-spec)
 
 ## About EOSIO Labs
 
@@ -26,27 +34,29 @@ An integrating application uses either an Apple Universal Link or a Deep Link to
 
 Universal Links are encouraged, as they are unique to authenticator applications and cannot be assumed by other apps installed on a user’s device.
 
+Similar transports are available on other platforms (_e.g._, Android).
+
 #### Server Fetch via Another Transport (QR, etc.)
 The requesting application provides a `requestUrl` in the payload. Authenticator applications will then fetch the request from the `requestUrl`. The `requestUrl` must be at the same domain or subdomain as the `referrerUrl`, if present.
 
 This is particularly useful for outgoing transports like QR in which an entire transaction cannot be included in the initial request.
 
 #### Server Request via Push Notification
-The integrating application submits the transaction request to a push notification server and the transaction request is delivered to the user via push notification. Details of this request transport are forthcoming.
+The integrating application submits the transaction request to a push notification server and the transaction request is delivered to the user via push notification. Details of this request transport are not yet defined.
 
 ### Response Transports
 #### URL Hash Fragment Identifier
 Authenticator applications will return a response to the request’s `returnUrl` with the payload appended as a hex-encoded URL hash fragment identifier. If the payload is encrypted the public key is provided at the end preceded by `-`.
 
 * URL or Universal Link: `https://{siteUrl}/some-resource/resource-id#{hexPayload}-{publicKey}`
-* Deep Link:  `{customProtocol}://transaction-response#{hexPayload}-{publicKey}`
+* Deep Link: `{customProtocol}://transaction-response#{hexPayload}-{publicKey}`
 
 #### Webhook Callback URL
-Authenticator applications will POST the transaction response to the request’s `callbackUrl` appending `/transaction/{requestId}`. E.g., `https://{siteUrl}/transaction/{requestId}`.
+Authenticator applications will POST the transaction response to the request’s `callbackUrl` appending `/transaction/{requestId}`. _E.g._, `https://{siteUrl}/transaction/{requestId}`.
 
 ### Transport Encryption
 
-Payloads should be encrypted/decrypted with the algorithm `eciesEncryptionCofactorVariableIVX963SHA256AESGCM`.
+Payloads should be encrypted/decrypted with an agreed-up algorithm.
 
 ## Request Envelope
 The top level properties of each request payload make up the "request envelope". Envelopes may contain several keys:
@@ -61,13 +71,13 @@ The unique ID of the request as a UUIDv4. Most transports are not idempotent. Th
 Integrating applications (both web and native) must self-report a `declaredDomain`. Authenticator applications should not blindly trust this URL.
 
 ### `returnUrl` (**required**)
-The URL to which an authenticator application will return the user after the request has been processed and the user has taken any necessary action. For certain response transports (e.g., `urlHashFragmentIdentifier`), the response payload will be appended to this `returnUrl`.
+The URL to which an authenticator application will return the user after the request has been processed and the user has taken any necessary action. For certain response transports (_e.g._, `urlHashFragmentIdentifier`), the response payload will be appended to this `returnUrl`.
 
 ### `callbackUrl`
-The URL an authenticator application will post the response to. Only required for some transports (e.g., `webhook`).
+The URL an authenticator application will post the response to. Only required for some transports (_e.g._, `webhook`).
 
 ### `responseKey` (optional for now)
-An elliptic curve 65 byte public key. If provided, the response will be encrypted with this key using the alogithm `eciesEncryptionCofactorVariableIVX963SHA256AESGCM`
+An elliptic curve 65 byte public key. If provided, the response will be encrypted with this key using the agreed-upon algorithm.
 
 ### `securityExclusions` (optional)
 Integrating application developers working on integrating with a conforming authenticator application may request relaxed security settings for the sake of troubleshooting integration with an authenticator. Best practice dictates that authenticator applicationss should only respect these requests if 1) the user has explicitly enabled an authenticator's insecure mode and 2) the user has added the requesting domain to its `securityExclusion` whitelist. If both prerequisites are in place, an authenticator application may relax or ignore certain validation checks for the stated overrides.
@@ -76,7 +86,7 @@ Integrating application developers working on integrating with a conforming auth
 * `appMetadataIntegrity`: If `true`, an authenticator may skip chain manifest and app metadata integrity checks
 * `domainMatch`: If `true`, an authenticator may not enforce the same-origin policy
 * `whitelistedActions`: If `true`, an authenticator may allow signing of non-manifest-whitelisted actions
-* `iconIntegrity`: If `true`, an authenticator may skip app-, action-, and/or chain-icon integrity checks
+* `iconIntegrity`: If `true`, an authenticator may skip app-, action-, and/or chain-icon-integrity checks
 * `relaxedContractParsing`: If `true`, an authenticator may allow for parsing of non-compliant Ricardian contracts
 
 The `securityExclusion` key is only required if exclusions are being requested, and all keys will default to `false` if not explicitly listed.
@@ -92,13 +102,11 @@ At request time, authenticator applications will perform several checks:
 1. assert that the values for `domain` declared therein all match one another and the `declaredDomain`
 1. assert that the `appmeta` hashes from all chain manifests match one another
 1. fetch `app-metadata.json` from the `appmeta` url in the manifest and assert that the file's hash matches the hash declared in the manifests
-1. assert that any OS-supplied app identifier (e.g., bundle ID or package name) is whitelisted in the `appIdentifiers` field in `app-metadata.json` (for native applications only)
+1. assert that any OS-supplied app identifier (_e.g._, bundle ID or package name) is whitelisted in the `appIdentifiers` field in `app-metadata.json` (for native applications only)
 
 If all those checks pass, the request will be processed and the integrating application's information will be presented to the user. If any of those checks fails, an authenticator application will consider any `returnUrl` as invalid. No response will be sent to the integrating application and the authenticator application will display an error to the user.
 
-Responses will never be sent back to domains other than the requesting domain, unless the response transport is domainless (e.g., deep link).
-
-**TODO:** Explain what attack(s) these checks aim to prevent.
+Responses will never be sent back to domains other than the requesting domain, unless the response transport is domainless (_e.g._, deep link).
 
 ## **Request Types**
 ### Transport Authorization Request
@@ -132,10 +140,10 @@ This request type carries out two functions:
 Allows an integrating application to request proof of a user’s possession of one or more private keys corresponding to any public keys they have disclosed. This enables passwordless authentication flows so that integrating applcations can display private data to the authenticated user.
 
 ### Selective Disclosure Request
-Allows an app to request private user data (e.g., availableKeys, authorizers).
+Allows an app to request private user data (_e.g._, availableKeys, authorizers).
 
 #### Request:
-* **MUST**: include one or more requested attributes (e.g., availableKeys)
+* **MUST**: include one or more requested attributes (_e.g._, availableKeys)
 
 #### Authenticator:
 * **MUST**: prompt user to approve any disclosures they have not previously approved for an identical Selective Disclosure Request
